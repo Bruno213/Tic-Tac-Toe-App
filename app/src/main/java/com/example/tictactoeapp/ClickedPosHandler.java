@@ -1,32 +1,26 @@
 package com.example.tictactoeapp;
 
-import java.util.ArrayList;
 
 public class ClickedPosHandler {
 
-    private ArrayList fpPos;
-    private ArrayList spPos;
+    // player 1: 0
+    // player 2: 1
+    // empty: 2
+    private int[] clickedPositions = new int[] {2,2,2,2,2,2,2,2,2};
 
-    private int[][] winningPositions;
+    private int[][] winningPositions = new int[][] {
+            {0,1,2}, {3,4,5}, {6,7,8}, {0,3,6},
+            {1,4,7}, {2,5,8}, {0,4,8}, {2,4,6}, {0,1,2}
+    };
 
-    ClickedPosHandler() {
-        this.fpPos = new ArrayList();
-        this.spPos = new ArrayList();
-
-        this.winningPositions = new int[][] {
-                {0,1,2}, {3,4,5}, {6,7,8}, {0,3,6},
-                {1,4,7}, {2,5,8}, {0,4,8},{2,4,6}
-        };
-    }
-
-    public boolean checkRightSequence(ArrayList playerClickedPos) {
+    public boolean checkRightSequence(int playerId) {
         boolean test = false;
 
         for(int i = 0; i < winningPositions.length; i++) {
             if(
-                playerClickedPos.contains(winningPositions[i][0]) &&
-                playerClickedPos.contains(winningPositions[i][1]) &&
-                playerClickedPos.contains(winningPositions[i][2])
+                clickedPositions[winningPositions[i][0]] == playerId &&
+                clickedPositions[winningPositions[i][1]] == playerId &&
+                clickedPositions[winningPositions[i][2]] == playerId
             ) {
                 test = true;
                 break;
@@ -38,34 +32,17 @@ public class ClickedPosHandler {
         return test;
     }
 
-    public ArrayList getFpPos() {
-        return fpPos;
+    public void setClickedPos(int playerId, int index) {
+        clickedPositions[index] = playerId;
     }
 
-    public ArrayList getSpPos() {
-        return spPos;
-    }
-
-    public ArrayList getClickedPositions() {
-        ArrayList arrayList = new ArrayList();
-
-        arrayList.addAll(fpPos);
-        arrayList.addAll(spPos);
-        return arrayList;
-    }
-
-
-
-    public void addFpPos(int i) {
-         fpPos.add(i);
-    }
-
-    public void addSpPos(int i) {
-        spPos.add(i);
+    public int[] getClickedPositions() {
+        return clickedPositions;
     }
 
     public void clearClickedPos() {
-        fpPos.clear();
-        spPos.clear();
+        for(int i = 0; i < clickedPositions.length; i++) {
+            clickedPositions[i] = 2;
+        }
     }
 }

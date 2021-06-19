@@ -10,43 +10,59 @@ import android.widget.Button;
 import android.widget.GridLayout;
 import android.widget.TextView;
 
-import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
+
+    private static ClickedPosHandler cp = new ClickedPosHandler();
 
     private GridLayout gl;
     private Button resetBtn;
     private TextView fpScoreField;
     private TextView spScoreField;
 
-    private static ClickedPosHandler cp = new ClickedPosHandler();
     private Button[] buttons = new Button[9];
 
     private int PlayerOneScore = 0;
     private int PlayerTwoScore = 0;
-
-    private int currentPlayer = 2;
+    private int currentPlayer = 1;
+    private int count = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        ActionBar actionBar;
-        actionBar = getSupportActionBar();
-
-        ColorDrawable colorDrawable;
-        colorDrawable = new ColorDrawable(Color.parseColor("#FF018786"));
-
-        actionBar.setBackgroundDrawable(colorDrawable);
+        setNewActionbarBackground();
 
         fpScoreField = findViewById(R.id.score_p1);
         spScoreField = findViewById(R.id.score_p2);
-
         resetBtn = findViewById(R.id.reset_button);
         gl = findViewById(R.id.grid_layout);
 
-        setSingleClickListener(gl);
+
+        int glLength = gl.getChildCount();
+        for(int i =0; i < glLength ; i++) {
+            int btnIndex = i;
+            Button btn = (Button) gl.getChildAt(i);
+            buttons[i] = btn;
+
+            btn.setOnClickListener(v -> {
+                boolean isPosAv = checkForPosAvailable(btnIndex);
+
+                if(isPosAv) {
+                    if(currentPlayer == 1) {
+                        btn.setText("X");
+                        currentPlayer = 0;
+                    } else {
+                        btn.setText("O");
+                        currentPlayer = 1;
+                    }
+                    count++;
+                    cp.setClickedPos(currentPlayer, btnIndex);
+                    checkForWin();
+                    checkForDraw();
+                }
+            });
+        }
 
         resetBtn.setOnClickListener(v -> {
             resetFields();
@@ -58,40 +74,21 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void setSingleClickListener(GridLayout gl) {
-        int glLength = gl.getChildCount();
-
-        for(int i =0; i < glLength ; i++) {
-            int index = i;
-            Button btn = (Button) gl.getChildAt(index);
-            buttons[index] = btn;
-
-            btn.setOnClickListener(v -> {
-                boolean isPosAv = checkPosAvailable(index);
-                if(isPosAv) {
-                  if(currentPlayer == 2) {
-                      btn.setText("X");
-                      currentPlayer = 1;
-                      cp.addFpPos(index);
-                  } else {
-                      btn.setText("O");
-                      currentPlayer = 2;
-                      cp.addSpPos(index);
-                  }
-                    checkForWin();
-                    checkForDraw();
-                }
-            });
-        }
+    private void setNewActionbarBackground() {
+        ActionBar actionBar;
+        actionBar = getSupportActionBar();
+        ColorDrawable colorDrawable;
+        colorDrawable = new ColorDrawable(Color.parseColor("#FF018786"));
+        actionBar.setBackgroundDrawable(colorDrawable);
     }
 
     public void checkForWin() {
-        if(cp.checkRightSequence(cp.getFpPos())) {
+        if(cp.checkRightSequence(0)) {
             PlayerOneScore += 1;
             fpScoreField.setText(String.format(": %d",PlayerOneScore));
             resetFields();
         }
-        if (cp.checkRightSequence(cp.getSpPos())) {
+        if (cp.checkRightSequence(1)) {
             PlayerTwoScore += 1;
             spScoreField.setText(String.format(": %d",PlayerTwoScore));
             resetFields();
@@ -99,19 +96,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void checkForDraw() {
-        if(cp.getClickedPositions().size() == 9) {
+        if(count == 9) {
             resetFields();
         }
     }
 
-    private boolean checkPosAvailable(int i) {
-        ArrayList clickedPos = cp.getClickedPositions();
+    private boolean checkForPosAvailable(int index) {
+        int[] clickedPos = cp.getClickedPositions();
 
-        for(int g=0; g < clickedPos.size(); g++) {
-            int b = (int) clickedPos.get(g);
-            if( b == i) return false;
-        }
-        return true;
+        if( clickedPos[index] == 2) return true;
+        return false;
     }
 
     private void resetFields() {
@@ -119,6 +113,7 @@ public class MainActivity extends AppCompatActivity {
             buttons[i].setText("");
         }
         cp.clearClickedPos();
-        currentPlayer = 2;
+        currentPlayer = 1;
     }
+
 }
